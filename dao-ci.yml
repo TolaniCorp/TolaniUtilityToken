@@ -1,0 +1,114 @@
+name: "🛠 TolaniToken CI Pipeline"
+
+# This workflow runs on pushes and pull requests targeting the `main` branch.
+# It installs dependencies, lints the codebase, compiles Hardhat contracts,
+# runs static analysis on the Solidity contracts, builds the React front‑end,
+# executes all unit/integration tests, and asserts the on‑chain decimals invariant.
+# If any step fails, the workflow uploads test artifacts for inspection.
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository contents at the current commit.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Set up the Node.js environment using the project's defined version.
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: npm
+
+      # Install top‑level dependencies via npm. Using `npm ci` ensures
+      # a clean, reproducible install based on package-lock.json.
+      - name: Install dependencies
+        run: npm ci
+
+      # Lint the JavaScript/TypeScript codebase if a lint script is defined.
+      # This conditional avoids failing the workflow when no lint script exists.
+      - name: Lint code
+        run: |
+          if [ -f package.json ] && jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
+            npm run lint
+          else
+            echo "No lint script defined, skipping lint step."
+          fi
+
+      # Compile the Hardhat contracts if a config is present. This step ensures
+      # Solidity contracts are compiled before running tests or static analysis.
+      - name: Compile contracts
+        run: |
+          if [ -f hardhat.config.js ] || [ -f hardhat.config.ts ]; then
+            npx hardhat compile
+          else
+            echo "No Hardhat config found, skipping compilation."
+          fi
+
+      # Run Solidity static analysis. This step installs and runs Solhint on
+      # all Solidity files in the `contracts` directory. The command will
+      # exit with a non‑zero code on lint errors, causing the workflow to fail.
+      - name: Static analysis (Solhint)
+        run: |
+          if [ -d contracts ]; then
+            npm install -g solhint
+            solhint 'contracts/**/*.sol'
+          else
+            echo "No contracts directory found, skipping static analysis."
+          fi
+
+      # Execute the test suite. If no tests are defined, the step
+      # simply logs a message instead of failing.
+      - name: Run tests
+        run: |
+          if [ -f package.json ]; then
+            npm test
+          else
+            echo "No package.json found, skipping tests."
+          fi
+
+      # Assert the TUT token decimals invariant. The script will throw if
+      # `decimals()` is not equal to 18. Provide the proxy address via secrets.
+      - name: Assert TUT decimals
+        if: ${{ github.event_name != 'pull_request' }}
+        env:
+          PROXY_ADDRESS: ${{ secrets.TUT_PROXY }}
+        run: |
+          if [ -z "${PROXY_ADDRESS}" ]; then
+            echo "TUT_PROXY secret not set, skipping assert step."
+          elif [ -f scripts/deployment/09_assert_decimals_TUT.js ]; then
+            node scripts/deployment/09_assert_decimals_TUT.js
+          else
+            echo "Assert decimals script not found, skipping."
+          fi
+
+      # Build the React front‑end if a package.json exists in the
+      # `frontend/dao-dashboard` directory. Installing dependencies locally
+      # before building ensures the build step has all required packages.
+      - name: Build front‑end
+        run: |
+          if [ -f frontend/dao-dashboard/package.json ]; then
+            cd frontend/dao-dashboard
+            npm install
+            npm run build
+          else
+            echo "No front‑end found, skipping build."
+          fi
+
+      # Upload test results or coverage when tests fail. Adjust the path to
+      # match your test runner's output directory.
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ./test-results
