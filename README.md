@@ -1,97 +1,66 @@
-[README.md](https://github.com/user-attachments/files/23108400/README.md)
-# Tolani Utility Token (TUT) 🚀
+# Tolani Utility Token (TUT)
 
-The Utility Token for participation, access, and payments in the Tolani Ecosystem
+> **Documentation-only public repository.** This repository is not an authoritative source for deployable smart contracts, ABIs, deployment scripts, relayers, wallets, payment services, or production configuration.
 
----
+TUT is the Tolani ecosystem utility and governance token. Its approved utility scope includes governance coordination, controlled access, service settlement, workforce programs, verified training rewards, and ecosystem participation. TUT is not equity, a dividend, a revenue share, or a claim on Tolani Corp profits.
 
-## 📖 Overview
+## Canonical source policy
 
-**TUT** powers DAO governance participation, access & permissions to DAO tools, payments & settlement for Tolani projects (HVAC, construction, workforce programs), payroll/escrow, ESG incentives, and training rewards—**without investment promises**.
+The target canonical engineering repository is:
 
-- **DAO Governance** (Snapshot voting; Safe execution)
-- **Access & Permissions** (role‑based features)
-- **Payments & Settlement** (internal services & invoices)
-- **Payroll & Escrow** (operational payouts)
-- **ESG & Training Incentives** (action‑based rewards)
+- `Tolani-Corp/tolani-protocol`
 
-> TUT is a **utility token**. It is **not** equity or a claim on profits or dividends.
+Until that repository is created and its migration is independently validated, the operational source for the currently deployed DAO stack remains:
 
-## 🔧 Tech Stack & Tools
+- `Tolani-Corp/TolaniEcosystemDAO`
 
-| Category       | Tools                                        |
-|---------------|----------------------------------------------|
-| Blockchain     | Ethereum, Polygon, Arbitrum                  |
-| Governance     | Snapshot, Gnosis Safe                        |
-| Smart Contracts| Solidity (+ OpenZeppelin), upgradeable proxy |
-| Frontend       | React/Next.js                                |
-| CI/CD & Testing| Hardhat, GitHub Actions                      |
+Historical code retained in this repository is **deprecated, unaudited for current production use, and non-deployable by policy**. Do not compile, deploy, fork, or integrate against it.
 
-## 🔢 Decimals & Denomination
+## Current production deployment registry
 
-- **On‑chain invariant:** `decimals() === 18`.
-- **UI policy:** Display/input precision depends on use‑case (Payments/Payroll: 2dp; Governance: 4dp; Access/Tiers: 0dp; ESG/Training: 4dp). See **docs/56_TUT_Decimal_Policy.md**.
+Primary networks:
 
-## 🚦 Governance & Operations
+- Ethereum mainnet: canonical TUT origin
+- Base mainnet: primary governance, utility, rewards, and payment-development network
 
-- Voting on **Snapshot**, execution via **Gnosis Safe**; upgrades follow **validate → prepare → upgrade** with storage layout and decimals checks.
-- Roles are assigned to operators by policy (see **docs/ROLES.md**).
+Known canonical addresses pending automated chain reconciliation:
 
-## 📑 Documentation
+| Component | Network | Address |
+| --- | --- | --- |
+| TUT proxy | Ethereum | `0x90e9d7189D605a824C2481Fe88A1d9A7DDFAF71D` |
+| Bridged TUT | Base | `0xAf7e938741a720508897Bf3a13538f6713A337A4` |
+| uTUT | Base | `0x6D3205ba4066260ca4B94F9221c46b95B1eedcD4` |
+| Governor | Base | `0xeEd65936FaEDb315c598F8b1aF796289BCE2B7f6` |
+| Timelock | Base | `0xb23f0662511ec0ee8d3760e3158a5Ab01551d52d` |
+| Treasury | Base | `0x3FaB09377944144eB991DB2a5ADf2C96A5e8587c` |
+| TUT converter | Base | `0xF064C89198Ce3c595bf60ac0b6A12045CB49ebeD` |
+| Training rewards | Base | `0x24D8bE6650DBb2e4F15FcCE540b1f417A48B3526` |
+| Staking pool | Base | `0xA2887e45E0aFF0476a841c3eE4a647A21f32A628` |
 
-- **55_TUT_Utility_Use_Cases.md** — approved non‑investment utilities
-- **56_TUT_Decimal_Policy.md** — display/input precision policy
-- **50_Tokenomics (tokenomics.md)** — symbol/decimals/supply
-- **UPGRADES.md**, **NETWORKS.md**, **ROLES.md**
+These entries are informational. Production integrations must use a generated, signed deployment registry backed by direct chain reads.
 
-## 🛠 Install & Run
+## Repository rules
 
-```bash
-git clone https://github.com/tolanicorp/TolaniToken.git
-cd TolaniToken
-npm install
-npm run dev
-```
+This repository accepts documentation changes only. The following are prohibited:
 
-## 🧪 Compile & Deploy
+- smart-contract development or deployment;
+- private keys, RPC secrets, wallet files, or signing material;
+- executable payment, relayer, custody, or transfer services;
+- manually asserted production addresses without evidence;
+- investment, profit, appreciation, or passive-return claims.
 
-```bash
-npm run contracts:compile
-# Configure .env: INIT_ARGS, RPC, etc.
-npm run contracts:deploy
-```
+See:
 
-## 🗂 Networks & Addresses
+- `ARCHIVE_NOTICE.md`
+- `docs/STATUS.md`
+- `docs/CONTRACTS.md`
+- `SECURITY.md`
+- `CONTRIBUTING.md`
 
-See `config/addresses.json` and **docs/NETWORKS.md** for the per‑chain proxy/implementation registry.
+## Security
 
-## 🌐 Domains & ENS Names
+Do not disclose vulnerabilities in public issues. Report security concerns to `security@tolanicorp.us`.
 
-We maintain a set of human‑readable ENS domains that map to important addresses in the Tolani ecosystem.  These names make it easy to reference smart contracts, treasuries and DAO portals without copying long hexadecimal addresses.
+## License
 
-| Domain               | Purpose                                              |
-|---------------------|------------------------------------------------------|
-| **tolanicorp.eth**   | Corporate identity and treasury address             |
-| **tolanidao.eth**    | Official ENS entry for the Tolani DAO               |
-| **tolaniworld.eth**  | Marketing portal and public information gateway    |
-| **tolaniecosystemdao.eth** | Primary ENS entry for the Tolani Ecosystem DAO address |
-| **tolanitoken.eth**   | Short ENS alias pointing to the TUT token proxy or treasury |
-| **tuttoken.dao**      | Unstoppable domain for the TUT token’s web3 presence |
-| **tuttoken.eth**      | Alternative ENS name for the TUT token and its treasury |
-| **tuttoken.pw**       | Traditional DNS domain used for the TUT token’s public website |
-
-To update or resolve these names:
-
-- Use the [ENS Manager](https://app.ens.domains/) for `.eth` names.  Each ENS domain can point to a contract address, wallet or IPFS content hash.
-- Manage `.dao` domains through the Unstoppable Domains dashboard to set crypto addresses or IPFS hashes.
-- Configure `.pw` domains through your DNS registrar, setting the appropriate A/AAAA or CNAME records for web hosting or API gateways.
-
-## 🔐 Security
-
-Third‑party audits and continuous review. Report vulnerabilities to <security@tolanicorp.us>.
-
-## 📜 License
-
-MIT
-
-> **Empowering Communities, Building Beyond.**
+Documentation and retained historical source remain subject to the repository license. No retained code should be interpreted as production authorization.

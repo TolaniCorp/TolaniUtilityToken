@@ -1,29 +1,37 @@
-# TolaniToken Contribution Guidelines
+# Contribution Policy
 
-Thanks for contributing to the Tolani Utility Token (**TUT**) project.
+This repository is a public, documentation-only reference for the Tolani Utility Token.
 
-## PR Requirements (must pass)
+## Accepted changes
 
-- ✅ **Decimals invariant:** run `node scripts/deployment/09_assert_decimals_TUT.js` against the target proxy; it must report `18`.
-- ✅ **UI amounts:** any component that displays or collects TUT amounts must use `tutFormat`/`tutParse` from `src/lib/10_TUT_decimal_policy.js` with the correct **context** (payments, governance, access, etc.).
-- ✅ Tests & lint pass; commits are descriptive.
+- correct factual documentation;
+- improve public risk, utility, governance, and network disclosures;
+- update verified contract addresses with direct chain evidence;
+- repair broken documentation links;
+- clarify migration or deprecation status.
 
-## Getting Started
+## Prohibited changes
 
-1. Fork & clone this repository.
-2. Run `npm install` to install dependencies.
-3. Create a feature branch off of `main`.
-4. Run tests locally with `npm test` and lint with `npm run lint`.
-5. Open a PR with a clear description when ready.
+Do not add or modify:
 
-## Code Standards
+- Solidity contracts or deployment scripts;
+- relayers, payment processors, wallets, APIs, or custody services;
+- executable frontend application code;
+- private keys, RPC credentials, signing material, or wallet files;
+- production addresses without an evidence reference;
+- language promising profit, appreciation, dividends, passive returns, or investment performance.
 
-- Use the Solidity style guide for smart contracts.
-- JavaScript/TypeScript should be formatted with Prettier.
-- Upgrade PRs must include storage layout notes and `validateUpgrade` logs.
+Protocol engineering belongs in `Tolani-Corp/tolani-protocol` after that canonical repository is created. Until migration is complete, changes to currently deployed contracts remain controlled through `Tolani-Corp/TolaniEcosystemDAO`.
+
+## Documentation pull requests
+
+Each pull request must:
+
+1. identify the factual source for material claims;
+2. explain whether the change affects public disclosures, live deployments, or migration status;
+3. avoid representing software readiness as legal, regulatory, financial, or operational authorization;
+4. pass the documentation-only repository policy check.
 
 ## Security
 
-If you discover a vulnerability, **do not** open a public issue. Email <security@tolanicorp.us>.
-
-> This repo enforces **utility‑only messaging** (no investment framing).
+Do not open public vulnerability reports. Send security disclosures to `security@tolanicorp.us`.

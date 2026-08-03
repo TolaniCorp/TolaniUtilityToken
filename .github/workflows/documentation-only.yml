@@ -1,0 +1,35 @@
+name: Documentation-only policy
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  enforce-documentation-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reject executable-source changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "origin/${{ github.base_ref }}...HEAD" > changed-files.txt
+          cat changed-files.txt
+
+          forbidden=0
+          while IFS= read -r path; do
+            case "$path" in
+              README.md|CONTRIBUTING.md|LICENSE|SECURITY.md|ARCHIVE_NOTICE.md|code_of_code.md|docs/*|.github/*)
+                ;;
+              *)
+                echo "Forbidden in documentation-only repository: $path" >&2
+                forbidden=1
+                ;;
+            esac
+          done < changed-files.txt
+
+          test "$forbidden" -eq 0
