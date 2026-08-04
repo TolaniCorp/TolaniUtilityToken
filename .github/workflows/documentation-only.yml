@@ -1,29 +1,47 @@
 name: Documentation-only policy
 
 on:
+  workflow_dispatch:
   pull_request:
 
 permissions:
   contents: read
 
+concurrency:
+  group: documentation-policy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   enforce-documentation-only:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Reject executable-source changes
+
+      - name: Validate documentation-only changes
         shell: bash
         run: |
           set -euo pipefail
+
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            echo "Manual policy health check completed."
+            exit 0
+          fi
+
+          git fetch --no-tags origin \
+            "+refs/heads/${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
           git diff --name-only "origin/${{ github.base_ref }}...HEAD" > changed-files.txt
           cat changed-files.txt
 
+          workflow_path=".github/workflows/documentation-only.yml"
           forbidden=0
+
           while IFS= read -r path; do
             case "$path" in
-              README.md|CONTRIBUTING.md|LICENSE|SECURITY.md|ARCHIVE_NOTICE.md|code_of_code.md|docs/*|.github/*)
+              README.md|CONTRIBUTING.md|LICENSE|SECURITY.md|ARCHIVE_NOTICE.md|code_of_code.md|docs/*|.github/CODEOWNERS|.github/ISSUE_TEMPLATE/*|.github/PULL_REQUEST_TEMPLATE.md|"$workflow_path")
                 ;;
               *)
                 echo "Forbidden in documentation-only repository: $path" >&2
@@ -31,5 +49,10 @@ jobs:
                 ;;
             esac
           done < changed-files.txt
+
+          if grep -Fxq "$workflow_path" changed-files.txt && [ "${{ github.actor }}" != "TolaniCorp" ]; then
+            echo "Only the repository owner may propose changes to the documentation policy workflow." >&2
+            forbidden=1
+          fi
 
           test "$forbidden" -eq 0
